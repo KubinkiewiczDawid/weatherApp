@@ -6,6 +6,7 @@ import com.dawidk.weatherapp.repository.network.NetworkRepository
 import com.dawidk.weatherapp.repository.network.service.WeatherService
 import com.dawidk.weatherapp.repository.util.WeatherDataMapper
 import com.dawidk.weatherapp.ui.mainscreen.MainViewModel
+import com.dawidk.weatherapp.ui.mainscreen.WeatherItemsProvider
 import com.google.gson.GsonBuilder
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -20,7 +21,7 @@ import retrofit2.converter.scalars.ScalarsConverterFactory
 private const val BASE_URL = "https://api.darksky.net/forecast/2bb07c3bece89caf533ac9a5d23d8417/"
 
 val appModule = module {
-    viewModel { MainViewModel(get()) }
+    viewModel { MainViewModel(get(), get()) }
     single{ createRetrofit() }
     single { createWeatherService(get()) }
     single { WeatherDataMapper() }
@@ -35,6 +36,7 @@ val appModule = module {
             weatherService = get()
         )
     }
+    single { WeatherItemsProvider() }
 }
 
 private fun createRetrofit(): Retrofit {

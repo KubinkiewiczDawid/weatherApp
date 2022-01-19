@@ -12,7 +12,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 class MainViewModel(
-    private val repository: Repository
+    private val repository: Repository,
+    private val weatherItemsProvider: WeatherItemsProvider
 ): ViewModel() {
 
     private val _state: MutableStateFlow<MainState> = MutableStateFlow(MainState.Loading)

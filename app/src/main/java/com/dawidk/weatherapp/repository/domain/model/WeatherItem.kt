@@ -18,7 +18,7 @@ sealed class WeatherItem{
     ): WeatherItem()
 
     data class TimeSamplesWeatherItem(
-        val currentWeatherItem: List<CurrentWeatherItem>,
+        val weatherDetails: List<CurrentWeatherItem>,
         val icon: String,
         val summary: String
     ): WeatherItem()
