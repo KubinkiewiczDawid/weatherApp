@@ -17,6 +17,8 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.dawidk.utils.removeSmallerFromBigger
 import com.dawidk.weatherapp.databinding.ActivityMainBinding
+import com.dawidk.weatherapp.repository.domain.model.WeatherData
+import com.dawidk.weatherapp.repository.network.model.WeatherDataDto
 import com.dawidk.weatherapp.repository.util.Resource
 import com.dawidk.weatherapp.ui.mainscreen.state.MainAction
 import com.dawidk.weatherapp.ui.mainscreen.state.MainState
@@ -76,10 +78,14 @@ class MainActivity : AppCompatActivity(), LocationListener {
                                     is Resource.Success -> {
                                         binding.testTv.text =
                                             data?.currently?.apparentTemperature.toString()
+                                        data?.let { weatherData ->
+                                            displayWeather(weatherData)
+                                        }
                                     }
                                     is Resource.Error -> {
                                         showError(message)
                                     }
+                                    is Resource.Loading -> {}
                                 }
                             }
                         }
@@ -87,6 +93,10 @@ class MainActivity : AppCompatActivity(), LocationListener {
                 }
             }
         }
+    }
+
+    private fun displayWeather(weatherData: WeatherData) {
+
     }
 
     private fun showLoading() {

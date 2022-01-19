@@ -3,8 +3,10 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="app/src/main/res/drawable/rectangle_stroke.xml" value="0.30092592592592593" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.16770833333333332" />
         <entry key="app/src/main/res/layout/activity_splash.xml" value="0.16770833333333332" />
+        <entry key="app/src/main/res/layout/current_weather_item.xml" value="0.29485834207764955" />
       </map>
     </option>
   </component>

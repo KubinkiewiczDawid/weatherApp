@@ -1,9 +1,11 @@
 package com.dawidk.weatherapp.repository
 
-import com.dawidk.weatherapp.repository.network.model.WeatherDataDto
+import com.dawidk.weatherapp.repository.domain.model.WeatherData
+import com.dawidk.weatherapp.repository.util.WeatherDataMapper
 
 interface Repository {
 
-    suspend fun getWeatherData(latitude: Double, longitude: Double): WeatherDataDto
+    val weatherDataMapper: WeatherDataMapper
+    suspend fun getWeatherData(latitude: Double, longitude: Double): WeatherData
 
 }

@@ -4,6 +4,7 @@ import com.dawidk.weatherapp.repository.Repository
 import com.dawidk.weatherapp.repository.RepositoryImpl
 import com.dawidk.weatherapp.repository.network.NetworkRepository
 import com.dawidk.weatherapp.repository.network.service.WeatherService
+import com.dawidk.weatherapp.repository.util.WeatherDataMapper
 import com.dawidk.weatherapp.ui.mainscreen.MainViewModel
 import com.google.gson.GsonBuilder
 import okhttp3.OkHttpClient
@@ -22,9 +23,11 @@ val appModule = module {
     viewModel { MainViewModel(get()) }
     single{ createRetrofit() }
     single { createWeatherService(get()) }
+    single { WeatherDataMapper() }
     single<Repository> {
         RepositoryImpl(
-            networkRepository = get()
+            networkRepository = get(),
+            weatherDataMapper = get()
         )
     }
     single {

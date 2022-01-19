@@ -1,6 +1,6 @@
 package com.dawidk.weatherapp.repository.network.model
 
-data class HourlyDto(
+data class SampleRateDataDto(
     val weatherDetails: List<WeatherDetailsDto>,
     val icon: String,
     val summary: String
