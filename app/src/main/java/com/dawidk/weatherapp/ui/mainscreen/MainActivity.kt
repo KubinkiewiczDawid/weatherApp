@@ -15,6 +15,7 @@ import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.dawidk.utils.removeSmallerFromBigger
 import com.dawidk.weatherapp.databinding.ActivityMainBinding
 import com.dawidk.weatherapp.repository.domain.model.WeatherData
@@ -45,11 +46,21 @@ class MainActivity : AppCompatActivity(), LocationListener {
             }
         }
     }
-    private var mLastLocation: Location? = null
+    private var mLastLocation: Location? = null // TODO: Do I need that?
+    private var adapter: WeatherItemsAdapter? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        adapter = WeatherItemsAdapter()
+        binding.weatherRv.apply {
+            adapter = this@MainActivity.adapter
+            layoutManager = LinearLayoutManager(
+                this@MainActivity,
+            )
+        }
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         registerStateListener()
@@ -65,6 +76,11 @@ class MainActivity : AppCompatActivity(), LocationListener {
         stopLocationUpdates()
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        adapter = null
+    }
+
     private fun registerStateListener() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -76,11 +92,7 @@ class MainActivity : AppCompatActivity(), LocationListener {
                             with(it.weatherDataResponse) {
                                 when (this) {
                                     is Resource.Success -> {
-                                        binding.testTv.text =
-                                            data?.currently?.apparentTemperature.toString()
-                                        data?.let { weatherData ->
-                                            displayWeather(weatherData)
-                                        }
+                                        adapter?.submitList(data)
                                     }
                                     is Resource.Error -> {
                                         showError(message)
@@ -155,6 +167,5 @@ class MainActivity : AppCompatActivity(), LocationListener {
             viewModel.onAction(MainAction.LoadLocationWeather(location.latitude, location.longitude))
         }
         mLastLocation = location
-        binding.latLngTv.text = "${location.latitude}, ${location.longitude}"
     }
 }

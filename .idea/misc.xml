@@ -7,6 +7,9 @@
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.16770833333333332" />
         <entry key="app/src/main/res/layout/activity_splash.xml" value="0.16770833333333332" />
         <entry key="app/src/main/res/layout/current_weather_item.xml" value="0.29485834207764955" />
+        <entry key="app/src/main/res/layout/daily_weather_item.xml" value="0.16770833333333332" />
+        <entry key="app/src/main/res/layout/hourly_weather_item.xml" value="0.375" />
+        <entry key="app/src/main/res/layout/time_sample_weather_item.xml" value="0.16770833333333332" />
       </map>
     </option>
   </component>

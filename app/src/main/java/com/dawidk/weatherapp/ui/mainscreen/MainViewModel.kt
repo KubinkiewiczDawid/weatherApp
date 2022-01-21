@@ -3,6 +3,7 @@ package com.dawidk.weatherapp.ui.mainscreen
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dawidk.weatherapp.repository.Repository
+import com.dawidk.weatherapp.repository.domain.WeatherItemsProvider
 import com.dawidk.weatherapp.repository.util.Resource
 import com.dawidk.weatherapp.ui.mainscreen.state.MainAction
 import com.dawidk.weatherapp.ui.mainscreen.state.MainState
@@ -35,7 +36,7 @@ class MainViewModel(
             _state.value = MainState.Loading
             _state.value = try {
                 val response = repository.getWeatherData(latitude, longitude)
-                MainState.DataLoaded(Resource.Success(response))
+                MainState.DataLoaded(Resource.Success(weatherItemsProvider(response)))
             } catch (e: Exception) {
                 MainState.DataLoaded(Resource.Error(e.localizedMessage))
             }

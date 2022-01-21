@@ -16,10 +16,11 @@ class WeatherDataMapper : DomainMapper<WeatherDataDto, WeatherData> {
             latitude = model.latitude,
             longitude = model.longitude,
             timezone = model.timezone,
-            currently = model.currently.mapToDomainModel(),
-            hourly = model.hourly.mapToDomainModel(),
-            daily = model.daily.mapToDomainModel(),
-            flags = model.flags.mapToDomainModel(),
+            currently = model.currently?.mapToDomainModel(),
+            minutely = model.minutely?.mapToDomainModel(),
+            hourly = model.hourly?.mapToDomainModel(),
+            daily = model.daily?.mapToDomainModel(),
+            flags = model.flags?.mapToDomainModel(),
             offset = model.offset
         )
     }
@@ -29,10 +30,11 @@ class WeatherDataMapper : DomainMapper<WeatherDataDto, WeatherData> {
             latitude = domainModel.latitude,
             longitude = domainModel.longitude,
             timezone = domainModel.timezone,
-            currently = domainModel.currently.mapFromDomainModel(),
-            hourly = domainModel.hourly.mapFromDomainModel(),
-            daily = domainModel.daily.mapFromDomainModel(),
-            flags = domainModel.flags.mapFromDomainModel(),
+            currently = domainModel.currently?.mapFromDomainModel(),
+            minutely = domainModel.minutely?.mapFromDomainModel(),
+            hourly = domainModel.hourly?.mapFromDomainModel(),
+            daily = domainModel.daily?.mapFromDomainModel(),
+            flags = domainModel.flags?.mapFromDomainModel(),
             offset = domainModel.offset
         )
     }

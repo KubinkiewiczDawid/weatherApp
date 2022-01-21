@@ -6,3 +6,7 @@ fun Double.removeSmallerFromBigger(number: Double): Double {
     else
         this - number
 }
+
+fun Double.fahrenheitToCelsius(): Double{
+    return  (this - 32) * 0.5556
+}
