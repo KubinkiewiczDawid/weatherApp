@@ -22,9 +22,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.dawidk.utils.removeSmallerFromBigger
 import com.dawidk.weatherapp.databinding.FragmentWeatherBinding
 import com.dawidk.weatherapp.repository.util.Resource
-import com.dawidk.weatherapp.ui.mainscreen.state.MainAction
-import com.dawidk.weatherapp.ui.mainscreen.state.MainEvent
-import com.dawidk.weatherapp.ui.mainscreen.state.MainState
 import com.google.android.gms.location.*
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
@@ -73,7 +70,6 @@ class WeatherFragment : Fragment(), LocationListener {
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
         registerOnClickListener()
         registerStateListener()
-        registerEventListener()
     }
 
     override fun onResume() {
@@ -92,43 +88,21 @@ class WeatherFragment : Fragment(), LocationListener {
     }
 
     private fun registerOnClickListener() {
-        binding.aboutBtn.setOnClickListener {
-            viewModel.onAction(MainAction.NavigateToAboutScreen)
-        }
+        binding.aboutBtn.setOnClickListener { navigateToAboutScreen() }
     }
 
     private fun registerStateListener() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.state.collect {
+                viewModel.weatherDataResponse.collect {
                     when (it) {
-                        is MainState.Loading -> showLoading()
-                        is MainState.DataLoaded -> {
-                            hideLoading()
-                            with(it.weatherDataResponse) {
-                                when (this) {
-                                    is Resource.Success -> {
-                                        adapter?.submitList(data)
-                                    }
-                                    is Resource.Error -> {
-                                        showError(message)
-                                    }
-                                    is Resource.Loading -> {}
-                                }
-                            }
+                        is Resource.Success -> {
+                            adapter?.submitList(it.data)
                         }
-                    }
-                }
-            }
-        }
-    }
-
-    private fun registerEventListener() {
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.event.collect {
-                    when(it){
-                        is MainEvent.NavigateToAboutScreen -> navigateToAboutScreen()
+                        is Resource.Error -> {
+                            showError(it.message)
+                        }
+                        is Resource.Loading -> {}
                     }
                 }
             }
@@ -188,11 +162,11 @@ class WeatherFragment : Fragment(), LocationListener {
                 if (it.latitude.removeSmallerFromBigger(location.latitude) > 0.5 &&
                     it.longitude.removeSmallerFromBigger(location.longitude) > 0.5
                 ) {
-                    viewModel.onAction(MainAction.LoadLocationWeather(it.latitude, it.longitude))
+                    viewModel.fetchWeatherData(it.latitude, it.longitude)
                 }
             }
         } else {
-            viewModel.onAction(MainAction.LoadLocationWeather(location.latitude, location.longitude))
+            viewModel.fetchWeatherData(location.latitude, location.longitude)
         }
         mLastLocation = location
     }
