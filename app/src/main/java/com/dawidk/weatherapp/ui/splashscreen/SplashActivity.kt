@@ -6,15 +6,12 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.os.Looper
 import android.provider.Settings
-import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
-import com.dawidk.weatherapp.R
 import com.dawidk.weatherapp.databinding.ActivitySplashBinding
-import com.dawidk.weatherapp.ui.mainscreen.MainActivity
+import com.dawidk.weatherapp.ui.MainActivity
 
 private const val MY_PERMISSIONS_REQUEST_LOCATION = 99
 

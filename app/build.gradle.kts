@@ -44,6 +44,7 @@ android {
 
 dependencies {
     implementation(AppDependencies.appLibraries)
+    implementation("androidx.legacy:legacy-support-v4:1.0.0")
     testImplementation(AppDependencies.testLibraries)
     androidTestImplementation(AppDependencies.androidTestLibraries)
 }

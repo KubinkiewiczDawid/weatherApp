@@ -2,4 +2,6 @@
     <string name="app_name">WeatherApp</string>
     <string name="must_accept_permissions_info">You must accept the location permissions to use this app</string>
     <string name="go_to_app_settings">Go to app settings</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
