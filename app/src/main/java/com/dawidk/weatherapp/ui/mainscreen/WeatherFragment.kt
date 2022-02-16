@@ -113,7 +113,6 @@ class WeatherFragment : Fragment(), LocationListener {
                                     is Resource.Error -> {
                                         showError(message)
                                     }
-                                    is Resource.Loading -> {}
                                 }
                             }
                         }
