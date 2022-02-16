@@ -4,12 +4,13 @@ import com.dawidk.weatherapp.repository.Repository
 import com.dawidk.weatherapp.repository.RepositoryImpl
 import com.dawidk.weatherapp.repository.network.NetworkRepository
 import com.dawidk.weatherapp.repository.network.service.WeatherService
-import com.dawidk.weatherapp.ui.mainscreen.MainViewModel
+import com.dawidk.weatherapp.repository.util.WeatherDataMapper
+import com.dawidk.weatherapp.ui.mainscreen.WeatherViewModel
+import com.dawidk.weatherapp.repository.domain.WeatherItemsProvider
 import com.google.gson.GsonBuilder
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import org.koin.androidx.viewmodel.dsl.viewModel
-import org.koin.core.qualifier.named
 import org.koin.dsl.module
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -19,12 +20,14 @@ import retrofit2.converter.scalars.ScalarsConverterFactory
 private const val BASE_URL = "https://api.darksky.net/forecast/2bb07c3bece89caf533ac9a5d23d8417/"
 
 val appModule = module {
-    viewModel { MainViewModel(get()) }
+    viewModel { WeatherViewModel(get(), get()) }
     single{ createRetrofit() }
     single { createWeatherService(get()) }
+    single { WeatherDataMapper() }
     single<Repository> {
         RepositoryImpl(
-            networkRepository = get()
+            networkRepository = get(),
+            weatherDataMapper = get()
         )
     }
     single {
@@ -32,6 +35,7 @@ val appModule = module {
             weatherService = get()
         )
     }
+    single { WeatherItemsProvider() }
 }
 
 private fun createRetrofit(): Retrofit {

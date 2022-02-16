@@ -5,29 +5,35 @@ import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import android.location.Location
 import android.location.LocationListener
-import com.google.android.gms.location.*
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Looper
+import androidx.fragment.app.Fragment
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.dawidk.utils.removeSmallerFromBigger
-import com.dawidk.weatherapp.databinding.ActivityMainBinding
+import com.dawidk.weatherapp.databinding.FragmentWeatherBinding
 import com.dawidk.weatherapp.repository.util.Resource
 import com.dawidk.weatherapp.ui.mainscreen.state.MainAction
+import com.dawidk.weatherapp.ui.mainscreen.state.MainEvent
 import com.dawidk.weatherapp.ui.mainscreen.state.MainState
+import com.google.android.gms.location.*
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
-import kotlinx.coroutines.flow.collect
 
-class MainActivity : AppCompatActivity(), LocationListener {
+class WeatherFragment : Fragment(), LocationListener {
 
-    private val viewModel by viewModel<MainViewModel>()
-    private lateinit var binding: ActivityMainBinding
+    private val viewModel by viewModel<WeatherViewModel>()
+    private lateinit var binding: FragmentWeatherBinding
     private var fusedLocationClient: FusedLocationProviderClient? = null
     private val locationRequest: LocationRequest = LocationRequest.create().apply {
         interval = 30
@@ -44,13 +50,30 @@ class MainActivity : AppCompatActivity(), LocationListener {
         }
     }
     private var mLastLocation: Location? = null
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        binding = ActivityMainBinding.inflate(layoutInflater)
-        setContentView(binding.root)
+    private var adapter: WeatherItemsAdapter? = null
 
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        binding = FragmentWeatherBinding.inflate(inflater, container, false)
+        return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        adapter = WeatherItemsAdapter()
+        binding.weatherRv.apply {
+            adapter = this@WeatherFragment.adapter
+            layoutManager = LinearLayoutManager(
+                requireContext(),
+            )
+        }
+
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
+        registerOnClickListener()
         registerStateListener()
+        registerEventListener()
     }
 
     override fun onResume() {
@@ -63,9 +86,20 @@ class MainActivity : AppCompatActivity(), LocationListener {
         stopLocationUpdates()
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        adapter = null
+    }
+
+    private fun registerOnClickListener() {
+        binding.aboutBtn.setOnClickListener {
+            viewModel.onAction(MainAction.NavigateToAboutScreen)
+        }
+    }
+
     private fun registerStateListener() {
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.state.collect {
                     when (it) {
                         is MainState.Loading -> showLoading()
@@ -74,15 +108,27 @@ class MainActivity : AppCompatActivity(), LocationListener {
                             with(it.weatherDataResponse) {
                                 when (this) {
                                     is Resource.Success -> {
-                                        binding.testTv.text =
-                                            data?.currently?.apparentTemperature.toString()
+                                        adapter?.submitList(data)
                                     }
                                     is Resource.Error -> {
                                         showError(message)
                                     }
+                                    is Resource.Loading -> {}
                                 }
                             }
                         }
+                    }
+                }
+            }
+        }
+    }
+
+    private fun registerEventListener() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.event.collect {
+                    when(it){
+                        is MainEvent.NavigateToAboutScreen -> navigateToAboutScreen()
                     }
                 }
             }
@@ -98,7 +144,11 @@ class MainActivity : AppCompatActivity(), LocationListener {
     }
 
     private fun showError(message: String?) {
-        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+        Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+    }
+
+    private fun navigateToAboutScreen() {
+        findNavController().navigate(WeatherFragmentDirections.actionWeatherFragmentToAboutFragment())
     }
 
     @SuppressLint("MissingPermission")
@@ -120,10 +170,10 @@ class MainActivity : AppCompatActivity(), LocationListener {
 
     private fun isPermissionsGranted(): Boolean {
         return ContextCompat.checkSelfPermission(
-            this,
+            requireContext(),
             Manifest.permission.ACCESS_FINE_LOCATION
         ) == PackageManager.PERMISSION_GRANTED && ContextCompat.checkSelfPermission(
-            this,
+            requireContext(),
             Manifest.permission.ACCESS_COARSE_LOCATION
         ) == PackageManager.PERMISSION_GRANTED
     }
@@ -145,6 +195,5 @@ class MainActivity : AppCompatActivity(), LocationListener {
             viewModel.onAction(MainAction.LoadLocationWeather(location.latitude, location.longitude))
         }
         mLastLocation = location
-        binding.latLngTv.text = "${location.latitude}, ${location.longitude}"
     }
 }

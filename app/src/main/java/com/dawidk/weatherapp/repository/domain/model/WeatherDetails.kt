@@ -1,6 +1,6 @@
-package com.dawidk.weatherapp.repository.network.model
+package com.dawidk.weatherapp.repository.domain.model
 
-data class WeatherDetailsDto(
+data class WeatherDetails(
     val apparentTemperature: Double?,
     val cloudCover: Double?,
     val dewPoint: Double?,
