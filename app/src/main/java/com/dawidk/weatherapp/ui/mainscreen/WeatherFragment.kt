@@ -7,32 +7,28 @@ import android.location.Location
 import android.location.LocationListener
 import android.os.Bundle
 import android.os.Looper
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.dawidk.mvi.MviFragment
 import com.dawidk.utils.removeSmallerFromBigger
 import com.dawidk.weatherapp.databinding.FragmentWeatherBinding
 import com.dawidk.weatherapp.repository.util.Resource
-import com.dawidk.weatherapp.ui.mainscreen.state.MainAction
 import com.dawidk.weatherapp.ui.mainscreen.state.MainEvent
+import com.dawidk.weatherapp.ui.mainscreen.state.MainIntent
 import com.dawidk.weatherapp.ui.mainscreen.state.MainState
 import com.google.android.gms.location.*
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
-class WeatherFragment : Fragment(), LocationListener {
+class WeatherFragment : MviFragment<MainState, MainIntent, MainEvent, WeatherViewModel>(),
+    LocationListener {
 
-    private val viewModel by viewModel<WeatherViewModel>()
+    override val viewModel by viewModel<WeatherViewModel>()
     private lateinit var binding: FragmentWeatherBinding
     private var fusedLocationClient: FusedLocationProviderClient? = null
     private val locationRequest: LocationRequest = LocationRequest.create().apply {
@@ -72,8 +68,7 @@ class WeatherFragment : Fragment(), LocationListener {
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
         registerOnClickListener()
-        registerStateListener()
-        registerEventListener()
+        initializeBaseObservers()
     }
 
     override fun onResume() {
@@ -93,28 +88,22 @@ class WeatherFragment : Fragment(), LocationListener {
 
     private fun registerOnClickListener() {
         binding.aboutBtn.setOnClickListener {
-            viewModel.onAction(MainAction.NavigateToAboutScreen)
+            postIntent(MainIntent.NavigateToAboutScreen)
         }
     }
 
-    private fun registerStateListener() {
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.state.collect {
-                    when (it) {
-                        is MainState.Loading -> showLoading()
-                        is MainState.DataLoaded -> {
-                            hideLoading()
-                            with(it.weatherDataResponse) {
-                                when (this) {
-                                    is Resource.Success -> {
-                                        adapter?.submitList(data)
-                                    }
-                                    is Resource.Error -> {
-                                        showError(message)
-                                    }
-                                }
-                            }
+    override fun registerStateListener(viewState: MainState) {
+        when (viewState) {
+            is MainState.Loading -> showLoading()
+            is MainState.DataLoaded -> {
+                hideLoading()
+                with(viewState.weatherDataResponse) {
+                    when (this) {
+                        is Resource.Success -> {
+                            adapter?.submitList(data)
+                        }
+                        is Resource.Error -> {
+                            showError(message)
                         }
                     }
                 }
@@ -122,15 +111,9 @@ class WeatherFragment : Fragment(), LocationListener {
         }
     }
 
-    private fun registerEventListener() {
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.event.collect {
-                    when(it){
-                        is MainEvent.NavigateToAboutScreen -> navigateToAboutScreen()
-                    }
-                }
-            }
+    override fun registerEventListener(viewEvent: MainEvent) {
+        when (viewEvent) {
+            is MainEvent.NavigateToAboutScreen -> navigateToAboutScreen()
         }
     }
 
@@ -182,16 +165,16 @@ class WeatherFragment : Fragment(), LocationListener {
     }
 
     private fun updateCurrentPosition(location: Location) {
-        if(mLastLocation != null) {
+        if (mLastLocation != null) {
             mLastLocation?.let {
                 if (it.latitude.removeSmallerFromBigger(location.latitude) > 0.5 &&
                     it.longitude.removeSmallerFromBigger(location.longitude) > 0.5
                 ) {
-                    viewModel.onAction(MainAction.LoadLocationWeather(it.latitude, it.longitude))
+                    postIntent(MainIntent.LoadLocationWeather(it.latitude, it.longitude))
                 }
             }
         } else {
-            viewModel.onAction(MainAction.LoadLocationWeather(location.latitude, location.longitude))
+            postIntent(MainIntent.LoadLocationWeather(location.latitude, location.longitude))
         }
         mLastLocation = location
     }
